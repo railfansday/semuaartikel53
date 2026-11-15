@@ -36,13 +36,21 @@ jobs:
         run: |
           python import.py
 
+      - name: Auto-Post New Articles to Blogspot
+        env:
+          GMAIL_USER: ${{ secrets.GMAIL_USER }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          BLOGGER_SECRET_EMAIL: ${{ secrets.BLOGGER_SECRET_EMAIL }}
+        run: |
+          python post_blogger.py
+
       - name: Commit & Push Updated Files
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          git add database.sqlite index.html page2.html sitemap.xml robots.txt feed.xml 2>/dev/null || true
+          git add database.sqlite index.html page2.html sitemap.xml robots.txt feed.xml blogger_sent.txt 2>/dev/null || true
           if ! git diff --staged --quiet; then
-            git commit -m "Auto update news, HTML, sitemap, and RSS"
+            git commit -m "Auto update news, HTML, sitemap, RSS, and sync Blogger"
             git pull --rebase -X ours --autostash origin main
             git push origin main
           else
